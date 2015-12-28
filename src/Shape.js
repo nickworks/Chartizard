@@ -11,17 +11,18 @@ Shape.type = {
     diamond:3
 };
 Shape.prototype = {
+    padding:10,
     r:0,
     dirty:()=>{this.parent.dirty();},
     calc:function(){
         this.xy = this.parent.xy.add(this.parent.wh.x/2, 0);
-        this.wh = this.parent.wh.add(10, 0);
+        this.wh = this.parent.wh.add(this.padding, 0);
         
         var r = 20;
         if(Caption.prototype.isPrototypeOf(this.parent)){
             this.type = Shape.type.rect;
-            r = 5;
         }
+        if(this.type == Shape.type.rect) r = 5;
         if(this.type == Shape.type.pill || r > this.wh.y/2) r = this.wh.y/2;
         
         this.big = new Rect(this.xy, this.wh.add(r * 2, 0));

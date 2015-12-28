@@ -1,16 +1,16 @@
 function Node(type, text){
     this.xy = V2(50);
     this.wh = V2(0, 44);
-    this.child = null;
+    this.nodes = [];
     this.type = type;
     this.cc = new CaptionCollection(this, text);
     this.isdirty = true;
     this.bg = new Shape(this);
     
-    this.dirty = function(){
+    this.dirty=function(){
         this.isdirty = true;  
     };
-    this.draw = function(g){  
+    this.draw=function(g){  
         g.font = "18px Arial";
         g.textBaseline = "middle";
         
@@ -22,9 +22,11 @@ function Node(type, text){
     this.calc=function(g){
         this.cc.calc(g);
         var w = this.wh.x = this.cc.wh.x;
+        var padding = 15;
         switch(this.type){
             case Node.type.start:
             case Node.type.end:
+                padding = 0;
                 this.bg.type = Shape.type.pill;
                 break;
             case Node.type.assign:
@@ -39,18 +41,23 @@ function Node(type, text){
                 this.bg.type = Shape.type.diamond;
                 break;
         }
+        this.bg.padding = padding + this.cc.padding;
         this.bg.calc();
         this.isdirty = false;
     };
-    this.move = function(p){
+    this.move=function(p){
         this.xy = p.copy();
         this.dirty();
     };
     this.onclick=function(m){
         // Nodes aren't selectable, so don't bother testing.
         // Instead, test against the input-type captions
+        var r = this.cc.onclick(m);
+        if(!r)this.nodes.forEach(n=>{
+            if(n.onclick(m)) r = true;
+        });
         
-        return this.cc.onclick(m);
+        return r;
     };
 }
 Node.type = {

@@ -4,6 +4,7 @@ function CaptionCollection(parent, pattern){
     this.wh = V2(0, 30);
     this.tokens = [];
     this.pattern = pattern;
+    this.padding = 0;
     
     var tokens = this.pattern.split(/(@)/);
     tokens.forEach(str => {
@@ -19,10 +20,12 @@ function CaptionCollection(parent, pattern){
         // get the text starting point:
         this.xy = this.parent.xy.copy();
         var xy = this.xy.copy();
+        this.padding = 0;
         // loop through each Caption:
         var i = 0;
         this.tokens.forEach(t => {
             if(i > 0) xy.x += 15;
+            if((i == 0 || i == this.tokens.length - 1) && t.input) this.padding = 10; 
             t.xy = xy.copy();
             t.calc(g);
             xy.x += t.wh.x;
