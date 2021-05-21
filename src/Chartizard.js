@@ -114,59 +114,98 @@ Chartizard.prototype = {
     draw:function(){
         var g = this.graphics;
         this.clear();
-        var drawNodes = nodes=>{
+
+        // why declare a function? recursion!
+        const drawNodes = nodes=>{
             if(!nodes.length) return;
             nodes.forEach(n=>{
-                if(n.nodes.length > 0) {
-                    this.lines(n.nodes, n.xy, n.type == Node.type.iterate);
-                    drawNodes(n.nodes);
+                if(n.nodes.length > 0) { // if the node has children
+                    this.drawLines2(n.nodes, n.xy, n.type == Node.type.iterate); // draw lines
+                    drawNodes(n.nodes); // draw children
                 }
-                n.draw(g);
+                n.draw(g); // draw the node
             });
         };
-        this.lines(this.nodes);
-        drawNodes(this.nodes);
+
+        this.drawLines2(this.nodes);
+        drawNodes(this.nodes); // draw this node (and child nodes)
     },
-    lines:function(nodes, p4, loop){
-        
+    drawLines2(nodes,sp=null,isLoop=false){
         if(!nodes.length) return;
+        const g = this.graphics;
         
-        var p1 = nodes[0].xy.copy();
-        var p2 = nodes[nodes.length-1].xy.copy();
-        
-        var g = this.graphics;
-        g.lineWidth = 2;
-        g.strokeStyle = Chartizard.colors.lines;
-        g.beginPath();
-        if(p4){
-            // draw loops and branches:
-            p1.y = p4.y;
-            p2.y += 55;
-            g.moveTo(p4.x, p4.y);
-            g.lineTo(p1.x, p1.y);
-            g.lineTo(p2.x, p2.y);
-            if(loop){
-                var p3 = p4.sub(40, 0);
-                g.lineTo(p4.x + 10, p2.y);
-                g.arc(p4.x, p2.y, 10, 0, Math.PI, true)
-                g.moveTo(p4.x - 10, p2.y);
-                g.lineTo(p3.x, p2.y);
-                g.lineTo(p3.x, p3.y);
-                g.lineTo(p4.x, p4.y);
-                g.stroke();
-            } else {
-                g.lineTo(p4.x, p2.y);
-                g.stroke();
-                g.fillStyle=Chartizard.colors.nodes;
+        // previous point
+        let pp = null;
+        if(sp&&sp.copy) pp = sp.copy();
+
+        const radius = 5;
+
+        nodes.forEach(n=>{
+
+            // current point
+            const cp = n.xy.copy();
+            
+            if(pp==null){
+                pp=cp.copy();
+                return;
+            }
+
+            // draw straight line:
+            g.beginPath();
+            g.moveTo(pp.x, pp.y);
+
+            if(pp.x < cp.x) { // draw elbow
+                g.lineTo(cp.x-radius, pp.y); 
+                g.arc(cp.x-radius, pp.y+radius, radius, -Math.PI/2, 0, false);
+            }
+
+            g.lineTo(cp.x, cp.y);
+            g.stroke();
+
+            // draw an arrowhead from above:
+            g.fillStyle = 'red';
+            g.beginPath();
+            g.ellipse(cp.x, cp.y-20, 5, 5, 0, 0, Math.PI*2);
+            g.fill();
+
+            // cache point
+            pp=cp.copy();
+
+        });
+
+        if(sp){
+            if(isLoop){
+                // draw path back to beginning of loop:
                 g.beginPath();
-                g.arc(p4.x, p2.y, 10, 0, Math.PI * 2);
+                g.moveTo(pp.x, pp.y);
+                g.lineTo(pp.x, pp.y+50-radius);
+                g.arc(pp.x-radius, pp.y+50-radius, radius, 0, Math.PI/2, false);
+
+                g.lineTo(sp.x+10, pp.y+50);
+                g.arc(sp.x, pp.y+50, 10, 0, Math.PI, true);
+                
+                g.lineTo(sp.x-50+radius, pp.y+50);
+                g.arc(sp.x-50+radius, pp.y+50-radius, radius, Math.PI/2, Math.PI, false);
+                g.lineTo(sp.x-50,sp.y+radius);
+                g.arc(sp.x-50+radius, sp.y+radius, radius, -Math.PI, -Math.PI/2, false);
+                g.lineTo(sp.x,sp.y);
+                g.stroke();
+
+                // draw an arrowhead from the left:
+                g.fillStyle = 'red';
+                g.beginPath();
+                g.ellipse(sp.x-30, sp.y, 5, 5, 0, 0, Math.PI*2);
                 g.fill();
+            } else {
+                // draw merge with parent branch:
+                g.beginPath();
+                g.moveTo(pp.x, pp.y);
+                g.lineTo(pp.x, pp.y+50-radius);
+                g.arc(pp.x-radius, pp.y+50-radius, 10, 0, Math.PI/2, false);
+                g.lineTo(sp.x+radius, pp.y+50);
+                g.arc(sp.x+radius, pp.y+50+radius, 10, -Math.PI/2, -Math.PI, true);
                 g.stroke();
             }
-        } else {
-            g.moveTo(p1.x, p1.y);
-            g.lineTo(p2.x, p2.y);
-            g.stroke();
         }
     },
     onclick:function(){
