@@ -1,8 +1,10 @@
-function Shape(parent){
+function Shape(parent,color=Chartizard.colors.nodes){
     this.parent = parent;
     this.xy = V2();
     this.wh = V2();
     this.type = Shape.type.pill;
+    this.color = color;
+    this.stroke = 0;
 }
 Shape.type = {
     pill:0,
@@ -42,14 +44,17 @@ Shape.prototype = {
                 this.drawRound(g);
         };
         
-        var c = Chartizard.colors;
-        var stroke = ()=>{
-            g.lineWidth = 2;
+        g.fillStyle = this.color;//isPicked ? c.tray : c.input;
+        g.fill();
+        if(this.stroke){
+            g.lineWidth = this.stroke;
             g.strokeStyle = Chartizard.colors.lines;
             g.stroke();  
-        };
-        if(Caption.prototype.isPrototypeOf(this.parent)){
-            var f = (this.parent == Chartizard.focusInput);
+        }
+
+        /*
+        if(Caption.prototype.isPrototypeOf(this.parent)){ // if parent is a Caption
+            var f = (this.parent == Chartizard.focusInput); // if it's in focus
             g.fillStyle = f ? c.tray : c.input;
             g.fill();
             if(f)stroke();
@@ -58,6 +63,7 @@ Shape.prototype = {
             g.fill();
             stroke();
         }
+        */
     },
     drawDiamond:function(g){
         var lil = this.lil, big = this.big;

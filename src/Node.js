@@ -14,10 +14,17 @@ function Node(type, text){
         g.font = "18px Arial";
         g.textBaseline = "middle";
         
+        const isPicked = (this == Chartizard.focusInput);
+
+        this.bg.color = isPicked ? Chartizard.colors.picked : Chartizard.colors.nodes;
+        this.bg.stroke = isPicked ? 2 : 0;
+
         if(this.isdirty) this.calc(g);
-        this.bg.draw(g);
-        this.cc.draw(g);
+        this.bg.draw(g); // draw background
+        this.cc.draw(g); // draw captions
         if(this.child) this.child.draw();
+
+
     };
     this.calc=function(g){
         this.cc.calc(g);
@@ -50,14 +57,27 @@ function Node(type, text){
         this.dirty();
     };
     this.onclick=function(m){
-        // Nodes aren't selectable, so don't bother testing.
-        // Instead, test against the input-type captions
-        var r = this.cc.onclick(m);
-        if(!r)this.nodes.forEach(n=>{
-            if(n.onclick(m)) r = true;
-        });
         
-        return r;
+        // check selectable captions:
+        if(this.cc.onclick(m)) return true;
+        
+        // check this node:
+        if(this.bg&&this.bg.big.hit(m)){
+            Chartizard.focus(this);
+            return true;
+        }
+        // check child nodes:
+        for(let i = 0; i < this.nodes.length; i++){
+            if(this.nodes[i].onclick(m)) return true;
+        }
+
+        return false;
+    };
+    this.focus=function(){
+    };
+    this.blur=function(){
+    };
+    this.drag=function(m){
     };
 }
 Node.type = {

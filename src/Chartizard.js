@@ -17,7 +17,8 @@ Chartizard.colors = {
     input:"#D7D7D7",
     error:"#972425",
     accent:"#92CEF0",
-    tray:"#92CEF0"
+    tray:"#92CEF0",
+    picked:"#95ACD0",
 };
 Chartizard.focus = function(f){
     Chartizard.blur();
@@ -133,7 +134,9 @@ Chartizard.prototype = {
     drawLines2(nodes,sp=null,isLoop=false){
         if(!nodes.length) return;
         const g = this.graphics;
-        
+        g.lineWidth = 2;
+        g.strokeStyle = Chartizard.colors.lines;
+
         // previous point
         let pp = null;
         if(sp&&sp.copy) pp = sp.copy();
@@ -183,7 +186,7 @@ Chartizard.prototype = {
 
                 g.lineTo(sp.x+10, pp.y+50);
                 g.arc(sp.x, pp.y+50, 10, 0, Math.PI, true);
-                
+
                 g.lineTo(sp.x-50+radius, pp.y+50);
                 g.arc(sp.x-50+radius, pp.y+50-radius, radius, Math.PI/2, Math.PI, false);
                 g.lineTo(sp.x-50,sp.y+radius);

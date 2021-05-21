@@ -4,7 +4,7 @@ function Caption(parent, text, input){
     this.xy = V2();
     this.wh = V2(100, 30);
     this.text = text || "";
-    this.bg = this.input ? new Shape(this) : false;
+    this.bg = this.input ? new Shape(this, Chartizard.colors.input) : false;
     this.cursor1 = 0;
     this.cursor2 = 0;
     this.anchor = 0;
@@ -65,8 +65,12 @@ Caption.prototype = {
         if(this.bg) this.bg.calc();
     },
     focus:function(){
+        this.bg.stroke=1;
+        this.bg.color=Chartizard.colors.tray;
     },
     blur:function(){
+        this.bg.stroke=0;
+        this.bg.color=Chartizard.colors.input;
     },
     clamp:function(){
         var m = this.text.length, c1 = this.cursor1, c2 = this.cursor2, a = this.anchor;
